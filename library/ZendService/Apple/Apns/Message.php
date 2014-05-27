@@ -295,7 +295,7 @@ class Message
      *
      * @return string
      */
-    public function getPayloadJson()
+    /*public function getPayloadJson()
     {
         $payload = $this->getPayload();
         // don't escape utf8 payloads unless json_encode does not exist.
@@ -305,6 +305,24 @@ class Message
             $payload = JsonEncoder::encode($payload);
         }
         $length = strlen($payload);
+
+        return pack('CNNnH*', 1, $this->id, $this->expire, 32, $this->token)
+            . pack('n', $length)
+            . $payload;
+    }*/
+     //FIX: Do not remove!!! (to encode correctly accentued characters)
+    public function getPayloadJson()
+    {
+        $payload = $this->getPayload();
+        // don't escape utf8 payloads unless json_encode does not exist.
+        if (defined('JSON_UNESCAPED_UNICODE') && function_exists('mb_strlen')) {
+            //$payload = json_encode($payload, JSON_UNESCAPED_UNICODE);
+            $payload = json_encode($payload);
+            $length = mb_strlen($payload, 'UTF-8');
+        } else {
+            $payload = JsonEncoder::encode($payload);
+            $length = strlen($payload);
+        }
 
         return pack('CNNnH*', 1, $this->id, $this->expire, 32, $this->token)
             . pack('n', $length)
